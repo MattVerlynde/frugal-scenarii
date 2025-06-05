@@ -102,41 +102,41 @@ def train(trainloader, validloader, model, num_epochs=20, transform=None, seed=4
         n = 0
         t_trainloader = tqdm(trainloader, desc="Training", position=1, leave=False)
 
-        os.makedirs(f'./logs/{model.__class__.__name__}/{seed}/epoch_{epoch}', exist_ok=True)
+        # os.makedirs(f'./logs/{model.__class__.__name__}/{seed}/epoch_{epoch}', exist_ok=True)
         
-        with torch.profiler.profile(
-            schedule=torch.profiler.schedule(wait=1, warmup=2, active=3, repeat=1),
-            on_trace_ready=torch.profiler.tensorboard_trace_handler(f'./logs/{model.__class__.__name__}/{seed}/epoch_{epoch}'),
-            record_shapes=True,
-            profile_memory=True,
-            with_stack=False,
-            activities=[torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.CUDA],
-            # use_cuda=True,
-        ) as prof:
-            for inputs, labels in t_trainloader:
-                    with torch.profiler.record_function('h2d copy'):
-                        inputs = inputs.to(device)
-                        labels = labels.to(device)
+        # with torch.profiler.profile(
+        #     schedule=torch.profiler.schedule(wait=1, warmup=2, active=3, repeat=1),
+        #     on_trace_ready=torch.profiler.tensorboard_trace_handler(f'./logs/{model.__class__.__name__}/{seed}/epoch_{epoch}'),
+        #     record_shapes=True,
+        #     profile_memory=True,
+        #     with_stack=False,
+        #     activities=[torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.CUDA],
+        #     # use_cuda=True,
+        # ) as prof:
+        for inputs, labels in t_trainloader:
+                    # with torch.profiler.record_function('h2d copy'):
+            inputs = inputs.to(device)
+            labels = labels.to(device)
 
-                    if transform:
-                        inputs = torch.stack([transform(input) for input in inputs])
+            if transform:
+                inputs = torch.stack([transform(input) for input in inputs])
 
-                    optimizer.zero_grad()
+            optimizer.zero_grad()
 
-                    with torch.set_grad_enabled(True):
-                        outputs = model(inputs)
-                        loss = criterion(outputs, labels)
-                        _, preds = torch.max(outputs, 1)
+            with torch.set_grad_enabled(True):
+                outputs = model(inputs)
+                loss = criterion(outputs, labels)
+                _, preds = torch.max(outputs, 1)
 
-                        loss.backward()
-                        optimizer.step()
-                    prof.step()
+                loss.backward()
+                optimizer.step()
+                    # prof.step()
 
-                    train_loss += loss.item() * inputs.size(0)
-                    train_corrects += torch.sum(preds == labels.data)
-                    n += 1
-            train_loss /= len(trainloader.dataset)
-            train_corrects = train_corrects.double() / len(trainloader.dataset)
+            train_loss += loss.item() * inputs.size(0)
+            train_corrects += torch.sum(preds == labels.data)
+            n += 1
+        train_loss /= len(trainloader.dataset)
+        train_corrects = train_corrects.double() / len(trainloader.dataset)
 
 
         val_loss = 0.0
