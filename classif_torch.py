@@ -255,6 +255,11 @@ if __name__ == "__main__":
                                     split='val', 
                                     transform=pretransform
                                     )
+    
+    dataset_test = datasets.ImageNet(root=data_root, 
+                                    split='test', 
+                                    transform=pretransform
+                                    )
 
     trainloader = DataLoader(dataset_val, 
                             batch_size=batch_size, 
@@ -272,6 +277,15 @@ if __name__ == "__main__":
                             #  prefetch_factor=prefetch_factor,
                             #  multiprocessing_context='fork'
                             )
+    testloader = DataLoader(dataset_test, 
+                            batch_size=batch_size, 
+                            shuffle=False, 
+                            num_workers=num_workers, 
+                            pin_memory=True, 
+                            #  prefetch_factor=prefetch_factor,
+                            #  multiprocessing_context='fork'
+                            )
+
 
     model = create_model(args.model, num_classes)
     results_train = train(trainloader=trainloader, validloader=validloader, model=model, num_epochs=num_epochs, transform=transform, seed=args.seed)
