@@ -200,7 +200,7 @@ def test(testloader, model, transform=None, seed=42):
 
     print(f'Test Loss: {test_loss:.5f}')
 
-    return test_loss, test_acc.item()
+    return pd.DataFrame([[0, test_loss, test_acc.item()]], columns=['epoch', 'loss', 'accuracy'])
 
 
 
@@ -322,14 +322,8 @@ if __name__ == "__main__":
     model = create_model(args.model, num_classes)
     results_train, results_val = train(trainloader=trainloader, validloader=validloader, model=model, num_epochs=num_epochs, transform=transform, seed=args.seed)
     results_test = test(testloader=testloader, model=model, transform=transform, seed=args.seed)
-    
-    results = pd.DataFrame({
-        'epoch': 0,
-        'loss': results_test[0],
-        'accuracy': results_test[1],
-    })
 
 
     results_train.to_csv(os.path.join(args.storage_path, f'results_train_{args.model}.csv'), index=True)
     results_val.to_csv(os.path.join(args.storage_path, f'results_val_{args.model}.csv'), index=True)
-    results.to_csv(os.path.join(args.storage_path, f'results_test_{args.model}.csv'), index=True)
+    results_test.to_csv(os.path.join(args.storage_path, f'results_test_{args.model}.csv'), index=True)
