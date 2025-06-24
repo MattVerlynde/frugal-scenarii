@@ -88,7 +88,8 @@ def train(trainloader, validloader, model, num_epochs=20, transform=None, seed=4
     # scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=1)
     scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
 
-    results = []
+    results_train = []
+    results_val = []
     counter = 0
     t = trange(num_epochs, desc="Epoch", position=0, leave=False)
     for epoch in t:
@@ -161,14 +162,45 @@ def train(trainloader, validloader, model, num_epochs=20, transform=None, seed=4
         val_acc = val_corrects.double() / len(validloader.dataset)
 
         print(f'Epoch {epoch}/{num_epochs} \t\t Training Loss: {train_loss:.5f}, Validation Loss: {val_loss:.5f}')
-        results.append(EpochProgress(epoch, train_loss, train_corrects.item()))
+        results_train.append(EpochProgress(epoch, train_loss, train_corrects.item()))
+        results_val.append(EpochProgress(epoch, val_loss, val_acc.item()))
 
         finished, counter = early_stopping(train_loss, val_loss, min_delta=0.01, patience=3, counter=counter)
         if finished:
             print(f"Early stopping at epoch {epoch}")
             break
 
-    return pd.DataFrame(results)
+    return pd.DataFrame(results_train, columns=['epoch', 'loss', 'accuracy']), pd.DataFrame(results_val, columns=['epoch', 'loss', 'accuracy'])
+
+def test(testloader, model, transform=None, seed=42):
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+    criterion = nn.CrossEntropyLoss()
+    
+    n = 0
+    test_loss = 0.0
+    test_corrects = 0
+    model.eval()
+    t_testloader = tqdm(testloader, desc="Test", position=1, leave=False)
+    n = 0
+    for inputs, labels in t_testloader:
+        inputs = inputs.to(device, non_blocking=True)
+        labels = labels.to(device, non_blocking=True)
+
+        with torch.no_grad():
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            _, preds = torch.max(outputs, 1)
+
+        test_loss += loss.item() * inputs.size(0)
+        test_corrects += torch.sum(preds == labels.data)
+        n += 1
+
+    test_loss /= len(testloader.dataset)
+    test_acc = test_corrects.double() / len(testloader.dataset)
+
+    print(f'Test Loss: {test_loss:.5f}')
+
+    return test_loss, test_acc.item()
 
 
 
@@ -288,7 +320,16 @@ if __name__ == "__main__":
 
 
     model = create_model(args.model, num_classes)
-    results_train = train(trainloader=trainloader, validloader=validloader, model=model, num_epochs=num_epochs, transform=transform, seed=args.seed)
-    # plot_results(results_train)
+    results_train, results_val = train(trainloader=trainloader, validloader=validloader, model=model, num_epochs=num_epochs, transform=transform, seed=args.seed)
+    results_test = test(testloader=testloader, model=model, transform=transform, seed=args.seed)
+    
+    results = pd.DataFrame({
+        'epoch': 0,
+        'loss': results_test[0],
+        'accuracy': results_test[1],
+    })
 
-    results_train.to_csv(os.path.join(args.storage_path, f'results_{args.model}.csv'), index=True)
+
+    results_train.to_csv(os.path.join(args.storage_path, f'results_train_{args.model}.csv'), index=True)
+    results_val.to_csv(os.path.join(args.storage_path, f'results_val_{args.model}.csv'), index=True)
+    results.to_csv(os.path.join(args.storage_path, f'results_test_{args.model}.csv'), index=True)
