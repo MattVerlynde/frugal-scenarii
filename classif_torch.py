@@ -164,10 +164,10 @@ def train(trainloader, validloader, model, num_epochs=20, transform=None, seed=4
         results_train.append(EpochProgress(epoch, train_loss, train_corrects.item()))
         results_val.append(EpochProgress(epoch, val_loss, val_acc.item()))
 
-        finished, counter = early_stopping(train_loss, val_loss, min_delta=0.001, patience=5, counter=counter)
-        if finished:
-            print(f"Early stopping at epoch {epoch}")
-            break
+        # finished, counter = early_stopping(train_loss, val_loss, min_delta=0.001, patience=5, counter=counter)
+        # if finished:
+        #     print(f"Early stopping at epoch {epoch}")
+        #     break
 
     return pd.DataFrame(results_train, columns=['epoch', 'loss', 'accuracy']), pd.DataFrame(results_val, columns=['epoch', 'loss', 'accuracy'])
 
