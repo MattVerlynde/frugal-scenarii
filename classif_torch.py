@@ -74,7 +74,7 @@ def early_stopping(train_loss, val_loss, min_delta, patience, counter=0):
     - bool: True if training should stop, False otherwise
     """
     finished = False
-    if (val_loss - train_loss) < min_delta:
+    if abs(val_loss - train_loss) < min_delta:
         counter += 1
         if counter >= patience:
             print("Early stopping triggered")
@@ -164,7 +164,7 @@ def train(trainloader, validloader, model, num_epochs=20, transform=None, seed=4
         results_train.append(EpochProgress(epoch, train_loss, train_corrects.item()))
         results_val.append(EpochProgress(epoch, val_loss, val_acc.item()))
 
-        finished, counter = early_stopping(train_loss, val_loss, min_delta=0.01, patience=3, counter=counter)
+        finished, counter = early_stopping(train_loss, val_loss, min_delta=0.01, patience=5, counter=counter)
         if finished:
             print(f"Early stopping at epoch {epoch}")
             break
