@@ -131,7 +131,6 @@ def train(trainloader, validloader, model, num_epochs=20, transform=None, seed=4
 
                 loss.backward()
                 optimizer.step()
-                    # prof.step()
 
             train_loss += loss.item() * inputs.size(0)
             train_corrects += torch.sum(preds == labels.data)
@@ -234,8 +233,8 @@ if __name__ == "__main__":
 
     args.pretrained = args.pretrained.lower() == 'true'  # Convert string to boolean
 
-    np.random.seed(37)
-    torch.manual_seed(37)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
