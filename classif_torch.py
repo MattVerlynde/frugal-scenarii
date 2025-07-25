@@ -266,6 +266,8 @@ if __name__ == "__main__":
 
     pretransform = CustomCompose([
         transforms.RandomResizedCrop(img_size),  # Resize the image to the specified size
+        transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
+        transforms.RandomRotation(degrees=45),  # Randomly rotate the image
         transforms.ToTensor(),           # Convert the PIL image to a tensor
         # transforms.Normalize(
         #     mean=[0.485, 0.456, 0.406], 
@@ -304,7 +306,7 @@ if __name__ == "__main__":
                             batch_size=batch_size, 
                             shuffle=False, 
                             num_workers=num_workers, 
-                            pin_memory=True, 
+                            pin_memory=True,
                             #  prefetch_factor=prefetch_factor,
                             #  multiprocessing_context='fork'
                             )
