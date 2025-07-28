@@ -246,6 +246,7 @@ if __name__ == "__main__":
     EpochProgress = namedtuple('EpochProgress', 'epoch, loss, accuracy')
 
     img_size = (256, 256)  # Image size for models like ResNet, VGG, etc.
+    crop_size = (224, 224)  # Crop size for models like ResNet, VGG, etc.
     num_classes = 1000
     pretrained = args.pretrained  # Use pretrained weights if specified
     num_epochs = args.num_epochs
@@ -265,13 +266,12 @@ if __name__ == "__main__":
             return img
 
     pretransform = CustomCompose([
-        transforms.RandomResizedCrop(img_size),  # Resize the image to the specified size
-        transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
-        transforms.RandomRotation(degrees=45),  # Randomly rotate the image
+        transforms.Resize(img_size, interpolation=transforms.InterpolationMode.BILINEAR),  # Resize the image to the specified size
+        transforms.CenterCrop(crop_size),  # Center crop the image to the specified size
         transforms.ToTensor(),           # Convert the PIL image to a tensor
-        # transforms.Normalize(
-        #     mean=[0.485, 0.456, 0.406], 
-        #     std=[0.229, 0.224, 0.225])  # Normalize the image
+        transforms.Normalize(
+            mean=[0.485, 0.456, 0.406], 
+            std=[0.229, 0.224, 0.225])  # Normalize the image
     ])
 
     transform = CustomCompose([
