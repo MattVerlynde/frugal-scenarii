@@ -81,12 +81,12 @@ def early_stopping(train_loss, val_loss, min_delta, patience, counter=0):
             finished = True
     return finished, counter
 
-def train(trainloader, validloader, model, num_epochs=20, transform=None, seed=42):
+def train(trainloader, validloader, model, num_epochs=100, transform=None, seed=42):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=0.01)
-    # scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=1)
-    scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)
+    # scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
 
     results_train = []
     results_val = []
