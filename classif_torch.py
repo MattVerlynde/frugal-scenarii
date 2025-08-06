@@ -22,6 +22,8 @@ def create_model(name, num_classes, pretrained=True):
         model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT if pretrained else None)
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, num_classes)
+        model.fc.weight.data.normal_(0, 0.01)  # Initialize weights
+        model.fc.bias.data.fill_(0.01)  # Initialize bias
     elif name == 'resnet50':
         model = models.resnet50(pretrained=pretrained)
         num_ftrs = model.fc.in_features
