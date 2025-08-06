@@ -19,7 +19,7 @@ def create_model(name, num_classes, pretrained=True):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     if name == 'resnet18':
-        model = models.resnet18(pretrained=pretrained)
+        model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT if pretrained else None)
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, num_classes)
     elif name == 'resnet50':
