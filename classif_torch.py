@@ -83,7 +83,7 @@ def early_stopping(train_loss, val_loss, min_delta, patience, counter=0):
             finished = True
     return finished, counter
 
-def train(trainloader, validloader, model, num_epochs=10, transform=None, seed=42):
+def train(trainloader, validloader, model, num_epochs=100, transform=None, seed=42):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     criterion = nn.CrossEntropyLoss()
     # optimizer = optim.SGD(model.parameters(), lr=0.01)
@@ -97,7 +97,6 @@ def train(trainloader, validloader, model, num_epochs=10, transform=None, seed=4
     t = trange(num_epochs, desc="Epoch", position=0, leave=False)
     for epoch in t:
         optimizer.step()
-        scheduler.step()
         model.train()
 
         train_loss = 0.0
@@ -130,7 +129,6 @@ def train(trainloader, validloader, model, num_epochs=10, transform=None, seed=4
         train_loss /= len(trainloader.dataset)
         train_corrects = train_corrects.double() / len(trainloader.dataset)
 
-
         val_loss = 0.0
         val_corrects = 0
         model.eval()
@@ -156,10 +154,7 @@ def train(trainloader, validloader, model, num_epochs=10, transform=None, seed=4
         results_train.append(EpochProgress(epoch, train_loss, train_corrects.item()))
         results_val.append(EpochProgress(epoch, val_loss, val_acc.item()))
 
-        # finished, counter = early_stopping(train_loss, val_loss, min_delta=0.001, patience=5, counter=counter)
-        # if finished:
-        #     print(f"Early stopping at epoch {epoch}")
-        #     break
+        scheduler.step()
 
     return pd.DataFrame(results_train, columns=['epoch', 'loss', 'accuracy']), pd.DataFrame(results_val, columns=['epoch', 'loss', 'accuracy'])
 
@@ -289,7 +284,7 @@ if __name__ == "__main__":
                                     transform=pretransform
                                     )
 
-    trainloader = DataLoader(dataset_val, 
+    trainloader = DataLoader(dataset_train, 
                             batch_size=batch_size, 
                             shuffle=True, 
                             num_workers=num_workers, 
