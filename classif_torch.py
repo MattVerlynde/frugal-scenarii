@@ -83,7 +83,7 @@ def early_stopping(train_loss, val_loss, min_delta, patience, counter=0):
             finished = True
     return finished, counter
 
-def train(trainloader, validloader, model, num_epochs=100, transform=None, seed=42):
+def train(trainloader, validloader, model, num_epochs=10, transform=None, seed=42):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     criterion = nn.CrossEntropyLoss()
     # optimizer = optim.SGD(model.parameters(), lr=0.01)
@@ -105,18 +105,7 @@ def train(trainloader, validloader, model, num_epochs=100, transform=None, seed=
 
         n = 0
         t_trainloader = tqdm(trainloader, desc="Training", position=1, leave=False)
-
-        # os.makedirs(f'./logs/{model.__class__.__name__}/{seed}/epoch_{epoch}', exist_ok=True)
         
-        # with torch.profiler.profile(
-        #     schedule=torch.profiler.schedule(wait=1, warmup=2, active=3, repeat=1),
-        #     on_trace_ready=torch.profiler.tensorboard_trace_handler(f'./logs/{model.__class__.__name__}/{seed}/epoch_{epoch}'),
-        #     record_shapes=True,
-        #     profile_memory=True,
-        #     with_stack=False,
-        #     activities=[torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.CUDA],
-        #     # use_cuda=True,
-        # ) as prof:
         for inputs, labels in t_trainloader:
                     # with torch.profiler.record_function('h2d copy'):
             inputs = inputs.to(device)
