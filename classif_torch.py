@@ -149,7 +149,7 @@ def train(trainloader, validloader, model, num_epochs=100, transform=None, seed=
         val_loss /= len(validloader.dataset)
         val_acc = val_corrects.double() / len(validloader.dataset)
 
-        print(f'Epoch {epoch}/{num_epochs} \t\t Training Loss: {train_loss:.5f}, Validation Loss: {val_loss:.5f}')
+        print(f'Epoch {epoch}/{num_epochs} \t\t Training Loss: {train_loss:.5f}, Acc: {train_corrects.item():.5f}, Validation Loss: {val_loss:.5f}, Acc: {val_acc.item():.5f}')
         results_train.append(EpochProgress(epoch, train_loss, train_corrects.item()))
         results_val.append(EpochProgress(epoch, val_loss, val_acc.item()))
 
