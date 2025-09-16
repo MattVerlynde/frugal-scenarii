@@ -61,27 +61,27 @@ def create_model(name, num_classes, pretrained=True):
         raise ValueError("Model not supported")
     return model.to(device)
 
-def early_stopping(train_loss, val_loss, min_delta, patience, counter=0):
-    """
-    Check if early stopping criteria are met.
+# def early_stopping(train_loss, val_loss, min_delta, patience, counter=0):
+#     """
+#     Check if early stopping criteria are met.
     
-    Parameters:
-    - train_loss: Current training loss
-    - val_loss: Current validation loss
-    - min_delta: Minimum change in the monitored quantity to qualify as an improvement
-    - patience: Number of epochs with no improvement after which training will be stopped
-    - counter: Counter for epochs with no improvement
+#     Parameters:
+#     - train_loss: Current training loss
+#     - val_loss: Current validation loss
+#     - min_delta: Minimum change in the monitored quantity to qualify as an improvement
+#     - patience: Number of epochs with no improvement after which training will be stopped
+#     - counter: Counter for epochs with no improvement
     
-    Returns:
-    - bool: True if training should stop, False otherwise
-    """
-    finished = False
-    if abs(val_loss - train_loss) < min_delta:
-        counter += 1
-        if counter >= patience:
-            print("Early stopping triggered")
-            finished = True
-    return finished, counter
+#     Returns:
+#     - bool: True if training should stop, False otherwise
+#     """
+#     finished = False
+#     if abs(val_loss - train_loss) < min_delta:
+#         counter += 1
+#         if counter >= patience:
+#             print("Early stopping triggered")
+#             finished = True
+#     return finished, counter
 
 def train(trainloader, validloader, model, num_epochs=100, transform=None, seed=42):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -96,7 +96,6 @@ def train(trainloader, validloader, model, num_epochs=100, transform=None, seed=
     counter = 0
     t = trange(num_epochs, desc="Epoch", position=0, leave=False)
     for epoch in t:
-        optimizer.step()
         model.train()
 
         train_loss = 0.0
@@ -254,7 +253,9 @@ if __name__ == "__main__":
 
     pretransform = CustomCompose([
         transforms.Resize(img_size, interpolation=transforms.InterpolationMode.BILINEAR),  # Resize the image to the specified size
-        transforms.CenterCrop(crop_size),  # Center crop the image to the specified size
+        # transforms.CenterCrop(crop_size),  # Center crop the image to the specified size
+        transforms.RandomResizedCrop(crop_size),  # Random crop the image to the specified size
+        transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
         transforms.ToTensor(),           # Convert the PIL image to a tensor
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406], 
@@ -264,7 +265,7 @@ if __name__ == "__main__":
     transform = CustomCompose([
         transforms.Resize(img_size, interpolation=transforms.InterpolationMode.BILINEAR),  # Resize the image to the specified size
         transforms.CenterCrop(crop_size),  # Center crop the image to the specified size
-        # transforms.ToTensor(),           # Convert the PIL image to a tensor
+        transforms.ToTensor(),           # Convert the PIL image to a tensor
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406], 
             std=[0.229, 0.224, 0.225])  # Normalize the image
