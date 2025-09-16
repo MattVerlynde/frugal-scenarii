@@ -277,12 +277,12 @@ if __name__ == "__main__":
                                     )
     dataset_val = datasets.ImageNet(root=data_root, 
                                     split='val', 
-                                    transform=pretransform
+                                    transform=transform
                                     )
     
     dataset_test = datasets.ImageNet(root=data_root, 
                                     split='test', 
-                                    transform=pretransform
+                                    transform=transform
                                     )
 
     trainloader = DataLoader(dataset_train, 
@@ -312,8 +312,8 @@ if __name__ == "__main__":
 
 
     model = create_model(args.model, num_classes)
-    results_train, results_val = train(trainloader=trainloader, validloader=validloader, model=model, num_epochs=num_epochs, transform=transform, seed=args.seed)
-    results_test = test(testloader=testloader, model=model, transform=transform, seed=args.seed)
+    results_train, results_val = train(trainloader=trainloader, validloader=validloader, model=model, num_epochs=num_epochs, seed=args.seed)
+    results_test = test(testloader=testloader, model=model, seed=args.seed)
 
 
     results_train.to_csv(os.path.join(args.storage_path, f'results_train_{args.model}.csv'), index=True)
