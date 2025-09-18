@@ -24,10 +24,22 @@ def create_model(name, num_classes, pretrained=True):
         model.fc = nn.Linear(num_ftrs, num_classes)
         model.fc.weight.data.normal_(0, 0.01)  # Initialize weights
         model.fc.bias.data.fill_(0.01)  # Initialize bias
+        if pretrained:
+            for param in model.parameters():
+                param.requires_grad = False
+            for param in model.fc.parameters():
+                param.requires_grad = True
     elif name == 'resnet50':
         model = models.resnet50(pretrained=pretrained)
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, num_classes)
+        model.fc.weight.data.normal_(0, 0.01)  # Initialize weights
+        model.fc.bias.data.fill_(0.01)  # Initialize bias
+        if pretrained:
+            for param in model.parameters():
+                param.requires_grad = False
+            for param in model.fc.parameters():
+                param.requires_grad = True
     elif name == 'vgg16':
         model = models.vgg16(pretrained=pretrained)
         num_ftrs = model.classifier[6].in_features
@@ -83,11 +95,11 @@ def create_model(name, num_classes, pretrained=True):
 #             finished = True
 #     return finished, counter
 
-def train(trainloader, validloader, model, num_epochs=100, transform=None, seed=42):
+def train(trainloader, validloader, model, num_epochs=100, seed=42):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     criterion = nn.CrossEntropyLoss()
     # optimizer = optim.SGD(model.parameters(), lr=0.01)
-    optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999), weight_decay=0.0001)
+    optimizer = optim.Adam(model.parameters(), lr=0.0001, betas=(0.9, 0.999), weight_decay=0.0001)
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)
     # scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
 
@@ -109,9 +121,6 @@ def train(trainloader, validloader, model, num_epochs=100, transform=None, seed=
             inputs = inputs.to(device)
             labels = labels.to(device)
 
-            if transform:
-                inputs = torch.stack([transform(input) for input in inputs])
-
             optimizer.zero_grad()
 
             with torch.set_grad_enabled(True):
@@ -127,6 +136,10 @@ def train(trainloader, validloader, model, num_epochs=100, transform=None, seed=
             n += 1
         train_loss /= len(trainloader.dataset)
         train_corrects = train_corrects.double() / len(trainloader.dataset)
+        results_train.append(EpochProgress(epoch, train_loss, train_corrects.item()))
+
+        results_train_df = pd.DataFrame(results_train, columns=['epoch', 'loss', 'accuracy'])
+        results_train_df.to_csv(os.path.join(args.storage_path, f'results_train_{args.model}.csv'), index=True)
 
         val_loss = 0.0
         val_corrects = 0
@@ -150,12 +163,14 @@ def train(trainloader, validloader, model, num_epochs=100, transform=None, seed=
         val_acc = val_corrects.double() / len(validloader.dataset)
 
         print(f'Epoch {epoch}/{num_epochs} \t\t Training Loss: {train_loss:.5f}, Acc: {train_corrects.item():.5f}, Validation Loss: {val_loss:.5f}, Acc: {val_acc.item():.5f}')
-        results_train.append(EpochProgress(epoch, train_loss, train_corrects.item()))
         results_val.append(EpochProgress(epoch, val_loss, val_acc.item()))
 
         scheduler.step()
 
-    return pd.DataFrame(results_train, columns=['epoch', 'loss', 'accuracy']), pd.DataFrame(results_val, columns=['epoch', 'loss', 'accuracy'])
+        results_val_df = pd.DataFrame(results_val, columns=['epoch', 'loss', 'accuracy'])
+        results_val_df.to_csv(os.path.join(args.storage_path, f'results_val_{args.model}.csv'), index=True)
+
+    return results_train_df, results_val_df
 
 def test(testloader, model, transform=None, seed=42):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -311,7 +326,7 @@ if __name__ == "__main__":
                             )
 
 
-    model = create_model(args.model, num_classes)
+    model = create_model(args.model, num_classes, pretrained=pretrained)
     results_train, results_val = train(trainloader=trainloader, validloader=validloader, model=model, num_epochs=num_epochs, seed=args.seed)
     results_test = test(testloader=testloader, model=model, seed=args.seed)
 
