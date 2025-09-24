@@ -249,7 +249,7 @@ if __name__ == "__main__":
     img_size = (256, 256)  # Image size for models like ResNet, VGG, etc.
     crop_size = (224, 224)  # Crop size for models like ResNet, VGG, etc.
     num_classes = 1000
-    pretrained = args.pretrained  # Use pretrained weights if specified
+    pretrained = True if args.pretrained else False  # Use pretrained weights if specified
     num_epochs = args.num_epochs
     batch_size = args.batch_size
     from multiprocessing import cpu_count
