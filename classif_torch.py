@@ -95,7 +95,7 @@ def create_model(name, num_classes, pretrained=True):
 #             finished = True
 #     return finished, counter
 
-def train(trainloader, validloader, model, num_epochs=100, seed=42):
+def train(trainloader, validloader, model, num_epochs=100, seed=42, testloader=None):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     criterion = nn.CrossEntropyLoss()
     # optimizer = optim.SGD(model.parameters(), lr=0.01)
@@ -169,6 +169,10 @@ def train(trainloader, validloader, model, num_epochs=100, seed=42):
 
         results_val_df = pd.DataFrame(results_val, columns=['epoch', 'loss', 'accuracy'])
         results_val_df.to_csv(os.path.join(args.storage_path, f'results_val_{args.model}.csv'), index=True)
+
+        if testloader is not None and (epoch == num_epochs - 1):
+            results_test = test(testloader=testloader, model=model, seed=args.seed)
+            print(f'Test Loss: {results_test["loss"].values[-1]:.5f}, Acc: {results_test["accuracy"].values[-1]:.5f}')
 
     return results_train_df, results_val_df
 
@@ -327,7 +331,7 @@ if __name__ == "__main__":
 
 
     model = create_model(args.model, num_classes, pretrained=pretrained)
-    results_train, results_val = train(trainloader=trainloader, validloader=validloader, model=model, num_epochs=num_epochs, seed=args.seed)
+    results_train, results_val = train(trainloader=trainloader, validloader=validloader, model=model, num_epochs=num_epochs, seed=args.seed, testloader=testloader)
     results_test = test(testloader=testloader, model=model, seed=args.seed)
 
 
