@@ -270,7 +270,7 @@ if __name__ == "__main__":
                     img = t(img)
             return img
 
-    pretransform = CustomCompose([
+    transform_train = CustomCompose([
         transforms.Resize(img_size, interpolation=transforms.InterpolationMode.BILINEAR),  # Resize the image to the specified size
         # transforms.CenterCrop(crop_size),  # Center crop the image to the specified size
         transforms.RandomResizedCrop(crop_size),  # Random crop the image to the specified size
@@ -281,7 +281,7 @@ if __name__ == "__main__":
             std=[0.229, 0.224, 0.225])  # Normalize the image
     ])
 
-    transform = CustomCompose([
+    transform_val = CustomCompose([
         transforms.Resize(img_size, interpolation=transforms.InterpolationMode.BILINEAR),  # Resize the image to the specified size
         transforms.CenterCrop(crop_size),  # Center crop the image to the specified size
         transforms.ToTensor(),           # Convert the PIL image to a tensor
@@ -290,19 +290,23 @@ if __name__ == "__main__":
             std=[0.229, 0.224, 0.225])  # Normalize the image
     ])
 
-    dataset_train = datasets.ImageNet(root=data_root, 
-                                    split='train', 
-                                    transform=pretransform
-                                    )
-    dataset_val = datasets.ImageNet(root=data_root, 
-                                    split='val', 
-                                    transform=transform
-                                    )
+    # dataset_train = datasets.ImageNet(root=data_root, 
+    #                                 split='train', 
+    #                                 transform=transform_train
+    #                                 )
+    # dataset_val = datasets.ImageNet(root=data_root, 
+    #                                 split='val', 
+    #                                 transform=transform
+    #                                 )
+    # dataset_test = datasets.ImageNet(root=data_root, 
+    #                                 split='test', 
+    #                                 transform=transform
+    #                                 )
     
-    dataset_test = datasets.ImageNet(root=data_root, 
-                                    split='test', 
-                                    transform=transform
-                                    )
+    full_train_dataset = datasets.ImageFolder(root=os.path.join(data_root, 'ILSVRC2012_img_train'), transform=transform_train)
+    len_dataset = len(full_train_dataset)
+    dataset_train, dataset_val = torch.utils.data.random_split(full_train_dataset, [len_dataset - 50000, 50000], generator=torch.Generator().manual_seed(args.seed))
+    dataset_test = datasets.ImageFolder(root=os.path.join(data_root, 'ILSVRC2012_img_val'), transform=transform_val)
 
     trainloader = DataLoader(dataset_train, 
                             batch_size=batch_size, 
