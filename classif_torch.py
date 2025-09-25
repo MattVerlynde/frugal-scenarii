@@ -308,7 +308,7 @@ if __name__ == "__main__":
     dataset_train, dataset_val = torch.utils.data.random_split(full_train_dataset, [len_dataset - 50000, 50000], generator=torch.Generator().manual_seed(args.seed))
     dataset_test = datasets.ImageFolder(root=os.path.join(data_root, 'val'), transform=transform_val)
 
-    trainloader = DataLoader(dataset_val, 
+    trainloader = DataLoader(dataset_train, 
                             batch_size=batch_size, 
                             shuffle=True, 
                             num_workers=num_workers, 
