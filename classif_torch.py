@@ -290,25 +290,25 @@ if __name__ == "__main__":
             std=[0.229, 0.224, 0.225])  # Normalize the image
     ])
 
-    # dataset_train = datasets.ImageNet(root=data_root, 
-    #                                 split='train', 
-    #                                 transform=transform_train
-    #                                 )
-    # dataset_val = datasets.ImageNet(root=data_root, 
-    #                                 split='val', 
-    #                                 transform=transform
-    #                                 )
-    # dataset_test = datasets.ImageNet(root=data_root, 
-    #                                 split='test', 
-    #                                 transform=transform
-    #                                 )
+    dataset_train = datasets.ImageNet(root=data_root, 
+                                    split='train', 
+                                    transform=transform_train
+                                    )
+    dataset_val = datasets.ImageNet(root=data_root, 
+                                    split='val', 
+                                    transform=transform_val
+                                    )
+    dataset_test = datasets.ImageNet(root=data_root, 
+                                    split='test', 
+                                    transform=transform_val
+                                    )
     
-    full_train_dataset = datasets.ImageFolder(root=os.path.join(data_root, 'ILSVRC2012_img_train'), transform=transform_train)
-    len_dataset = len(full_train_dataset)
-    dataset_train, dataset_val = torch.utils.data.random_split(full_train_dataset, [len_dataset - 50000, 50000], generator=torch.Generator().manual_seed(args.seed))
-    dataset_test = datasets.ImageFolder(root=os.path.join(data_root, 'ILSVRC2012_img_val'), transform=transform_val)
+    # full_train_dataset = datasets.ImageFolder(root=os.path.join(data_root, 'ILSVRC2012_img_train'), transform=transform_train)
+    # len_dataset = len(full_train_dataset)
+    # dataset_train, dataset_val = torch.utils.data.random_split(full_train_dataset, [len_dataset - 50000, 50000], generator=torch.Generator().manual_seed(args.seed))
+    # dataset_test = datasets.ImageFolder(root=os.path.join(data_root, 'ILSVRC2012_img_val'), transform=transform_val)
 
-    trainloader = DataLoader(dataset_train, 
+    trainloader = DataLoader(dataset_val, 
                             batch_size=batch_size, 
                             shuffle=True, 
                             num_workers=num_workers, 
