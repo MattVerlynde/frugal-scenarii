@@ -44,12 +44,12 @@ def create_model(name, num_classes, pretrained=True):
         model = models.vgg16(pretrained=pretrained)
         num_ftrs = model.classifier[6].in_features
         model.classifier[6] = nn.Linear(num_ftrs, num_classes)
-        model.classifier.weight.data.normal_(0, 0.01)  # Initialize weights
-        model.classifier.bias.data.fill_(0.01)  # Initialize bias
+        model.classifier[6].weight.data.normal_(0, 0.01)  # Initialize weights
+        model.classifier[6].bias.data.fill_(0.01)  # Initialize bias
         if pretrained:
             for param in model.parameters():
                 param.requires_grad = False
-            for param in model.classifier.parameters():
+            for param in model.classifier[6].parameters():
                 param.requires_grad = True
     elif name == 'densenet121':
         model = models.densenet121(pretrained=pretrained)
