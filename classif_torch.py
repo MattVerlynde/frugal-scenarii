@@ -109,13 +109,14 @@ def create_model(name, num_classes, pretrained=True):
 #             finished = True
 #     return finished, counter
 
-def train(trainloader, validloader, model, num_epochs=100, seed=42, testloader=None):
+def train(trainloader, validloader, model, lr=0.0001, gamma=0.1, num_epochs=100, seed=42, testloader=None):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     criterion = nn.CrossEntropyLoss()
     # optimizer = optim.SGD(model.parameters(), lr=0.01)
-    optimizer = optim.Adam(model.parameters(), lr=0.0001, betas=(0.9, 0.999), weight_decay=0.0001)
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)
+    optimizer = optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.999), weight_decay=0.0001)
+    # scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=gamma)
     # scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, "min", factor=gamma, patience=10)
 
     results_train = []
     results_val = []
@@ -179,7 +180,8 @@ def train(trainloader, validloader, model, num_epochs=100, seed=42, testloader=N
         print(f'Epoch {epoch}/{num_epochs} \t\t Training Loss: {train_loss:.5f}, Acc: {train_corrects.item():.5f}, Validation Loss: {val_loss:.5f}, Acc: {val_acc.item():.5f}')
         results_val.append(EpochProgress(epoch, val_loss, val_acc.item()))
 
-        scheduler.step()
+        # scheduler.step()
+        scheduler.step(val_loss)
 
         results_val_df = pd.DataFrame(results_val, columns=['epoch', 'loss', 'accuracy'])
         results_val_df.to_csv(os.path.join(args.storage_path, f'results_val_{args.model}.csv'), index=True)
