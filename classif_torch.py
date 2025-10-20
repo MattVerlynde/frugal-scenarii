@@ -242,6 +242,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='ImageNet Classification with PyTorch')
     parser.add_argument('--num_epochs', type=int, default=1, help='Number of epochs to train')
     parser.add_argument('--batch_size', type=int, default=512, help='Batch size for training and validation')
+    parser.add_argument('--learning_rate', type=float, default=0.0001, help='Learning rate for training and validation')
     parser.add_argument('--data_root', type=str, default='/media/HDD/ImageNet/ImageNet/imagenet', help='Root directory for ImageNet dataset')
     parser.add_argument('--model', type=str, default='resnet18', help='Model architecture to use (e.g., resnet18, resnet50, vgg16, etc.)')
     parser.add_argument('--pretrained', type=str, default='True', help='Use pretrained model weights')
@@ -351,7 +352,7 @@ if __name__ == "__main__":
 
 
     model = create_model(args.model, num_classes, pretrained=pretrained)
-    results_train, results_val = train(trainloader=trainloader, validloader=validloader, model=model, num_epochs=num_epochs, seed=args.seed, testloader=testloader)
+    results_train, results_val = train(trainloader=trainloader, validloader=validloader, model=model, num_epochs=num_epochs, seed=args.seed, testloader=testloader, lr=args.learning_rate)
     results_test = test(testloader=testloader, model=model, seed=args.seed)
 
 
