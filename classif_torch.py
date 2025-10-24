@@ -11,7 +11,6 @@ from collections import namedtuple
 import argparse
 
 from tqdm import trange, tqdm
-import detectors
 import timm
 
 
