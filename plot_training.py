@@ -6,7 +6,7 @@ results = pd.DataFrame(columns=['Epoch','Model', 'Accuracy_train', 'Accuracy_val
 
 for folder in os.listdir('results/conso-imagenet'):
     if folder[:3] == 'run':
-        if folder[4:] not in ['0', '1', '2', '3', '4']:
+        if folder[4:] in ['24', '27']:
             path = os.path.join('results/conso-imagenet', folder)
             for group in sorted(os.listdir(path)):
                 if group[-4:] != 'yaml':

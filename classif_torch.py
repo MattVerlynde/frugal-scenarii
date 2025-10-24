@@ -11,7 +11,8 @@ from collections import namedtuple
 import argparse
 
 from tqdm import trange, tqdm
-
+import detectors
+import timm
 
 
 def create_model(name, num_classes, pretrained=True):
@@ -25,6 +26,18 @@ def create_model(name, num_classes, pretrained=True):
         model.fc.weight.data.normal_(0, 0.01)  # Initialize weights
         model.fc.bias.data.fill_(0.01)  # Initialize bias
         if pretrained:
+            model = timm.create_model("hf_hub:edadaltocg/resnet18_cifar100", num_classes=num_classes, pretrained=True)
+            # override model
+            model.conv1 = nn.Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+            model.maxpool = nn.Identity()
+
+            model.load_state_dict(
+            torch.hub.load_state_dict_from_url(
+                "https://huggingface.co/edadaltocg/resnet18_cifar100/resolve/main/pytorch_model.bin",
+                map_location="cpu", 
+                file_name="resnet18_cifar100.pth",
+                )
+            )
             for param in model.parameters():
                 param.requires_grad = False
             for param in model.fc.parameters():
