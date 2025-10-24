@@ -26,7 +26,7 @@ def create_model(name, num_classes, pretrained=True):
             model.fc.weight.data.normal_(0, 0.01)  # Initialize weights
             model.fc.bias.data.fill_(0.01)  # Initialize bias
         if pretrained:
-            model = timm.create_model("hf_hub:edadaltocg/resnet18_cifar100", num_classes=100, pretrained=True)
+            model = timm.create_model("hf_hub:edadaltocg/resnet18_cifar100", num_classes=100, pretrained=False)
             # override model
             model.conv1 = nn.Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
             model.maxpool = nn.Identity()
