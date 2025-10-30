@@ -31,6 +31,8 @@ def create_model(name, num_classes, pretrained=True):
             # model.conv1 = nn.Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
             # model.maxpool = nn.Identity()
             model = models.resnet18(weights=None)
+            model.conv1 = nn.Conv2d(64, 3, 7)
+            model.fc = nn.Linear(model.fc.in_features, 100)
             model.load_state_dict(
             torch.hub.load_state_dict_from_url(
                 "https://huggingface.co/edadaltocg/resnet18_cifar100/resolve/main/pytorch_model.bin",
@@ -46,8 +48,7 @@ def create_model(name, num_classes, pretrained=True):
             #     param.requires_grad = False
             # for param in model.fc.parameters():
             #     param.requires_grad = True
-        num_ftrs = model.fc.in_features
-        model.fc = nn.Linear(num_ftrs, num_classes)
+        model.fc = nn.Linear(model.fc.in_features, num_classes)
         model.fc.weight.data.normal_(0, 0.01)  # Initialize weights
         model.fc.bias.data.fill_(0.01)  # Initialize bias
     elif name == 'resnet50':
