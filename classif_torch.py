@@ -21,15 +21,15 @@ def create_model(name, num_classes, pretrained=True):
     if name == 'resnet18':
         if not pretrained:
             model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT if pretrained else None)
-            num_ftrs = model.fc.in_features
-            model.fc = nn.Linear(num_ftrs, num_classes)
-            model.fc.weight.data.normal_(0, 0.01)  # Initialize weights
-            model.fc.bias.data.fill_(0.01)  # Initialize bias
+            # num_ftrs = model.fc.in_features
+            # model.fc = nn.Linear(num_ftrs, num_classes)
+            # model.fc.weight.data.normal_(0, 0.01)  # Initialize weights
+            # model.fc.bias.data.fill_(0.01)  # Initialize bias
         if pretrained:
-            model = timm.create_model("hf_hub:edadaltocg/resnet18_cifar100", num_classes=100, pretrained=False)
-            # override model
-            model.conv1 = nn.Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-            model.maxpool = nn.Identity()
+            # model = timm.create_model("hf_hub:edadaltocg/resnet18_cifar100", num_classes=100, pretrained=False)
+            # # override model
+            # model.conv1 = nn.Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+            # model.maxpool = nn.Identity()
 
             model.load_state_dict(
             torch.hub.load_state_dict_from_url(
@@ -38,14 +38,18 @@ def create_model(name, num_classes, pretrained=True):
                 file_name="resnet18_cifar100.pth",
                 )
             )
-            num_ftrs = model.fc.in_features
-            model.fc = nn.Linear(num_ftrs, num_classes)
-            model.fc.weight.data.normal_(0, 0.01)  # Initialize weights
-            model.fc.bias.data.fill_(0.01)  # Initialize bias
+            # num_ftrs = model.fc.in_features
+            # model.fc = nn.Linear(num_ftrs, num_classes)
+            # model.fc.weight.data.normal_(0, 0.01)  # Initialize weights
+            # model.fc.bias.data.fill_(0.01)  # Initialize bias
             # for param in model.parameters():
             #     param.requires_grad = False
             # for param in model.fc.parameters():
             #     param.requires_grad = True
+        num_ftrs = model.fc.in_features
+        model.fc = nn.Linear(num_ftrs, num_classes)
+        model.fc.weight.data.normal_(0, 0.01)  # Initialize weights
+        model.fc.bias.data.fill_(0.01)  # Initialize bias
     elif name == 'resnet50':
         model = models.resnet50(pretrained=pretrained)
         num_ftrs = model.fc.in_features
