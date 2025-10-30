@@ -31,7 +31,7 @@ def create_model(name, num_classes, pretrained=True):
             # model.conv1 = nn.Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
             # model.maxpool = nn.Identity()
             model = models.resnet18(weights=None)
-            model.conv1 = nn.Conv2d(in_channels = 3, out_channels = 64, kernel_size = 3, bias = True)
+            model.conv1 = nn.Conv2d(in_channels = 3, out_channels = 64, kernel_size = 3, bias = False)
             model.fc = nn.Linear(model.fc.in_features, 100)
             model.load_state_dict(
             torch.hub.load_state_dict_from_url(
