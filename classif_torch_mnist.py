@@ -286,10 +286,10 @@ if __name__ == "__main__":
             return img
 
     transform_train = CustomCompose([
-        transforms.Resize(img_size, interpolation=transforms.InterpolationMode.BILINEAR),  # Resize the image to the specified size
+        transforms.Resize(crop_size, interpolation=transforms.InterpolationMode.BILINEAR),  # Resize the image to the specified size
         # transforms.CenterCrop(crop_size),  # Center crop the image to the specified size
-        transforms.RandomResizedCrop(crop_size),  # Random crop the image to the specified size
-        transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
+        # transforms.RandomResizedCrop(crop_size),  # Random crop the image to the specified size
+        # transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
         transforms.ToTensor(),           # Convert the PIL image to a tensor
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406], 
