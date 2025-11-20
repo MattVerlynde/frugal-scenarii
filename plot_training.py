@@ -90,3 +90,6 @@ if __name__=="__main__":
     parser.add_argument("--output_path", type=str)
     parser.add_argument("--plot_path", "-g", type=int, required=True, nargs='+')
     args = parser.parse_args()
+
+    results = get_acc_loss(args.working_path, args.ids, args.output_path)
+    plot_acc_loss(args.output_path, args.plot_path)
