@@ -131,6 +131,28 @@ def create_model(name, num_classes, pretrained=True):
 #             finished = True
 #     return finished, counter
 
+class EarlyStopping:
+    def __init__(self, patience=5, delta=0, verbose=False):
+        self.patience = patience
+        self.delta = delta
+        self.verbose = verbose
+        self.best_loss = None
+        self.no_improvement_count = 0
+        self.stop_training = False
+    
+    def check_early_stop(self, val_loss):
+        if self.best_loss is None or val_loss < self.best_loss - self.delta:
+            self.best_loss = val_loss
+            self.no_improvement_count = 0
+        else:
+            self.no_improvement_count += 1
+            if self.no_improvement_count >= self.patience:
+                self.stop_training = True
+                if self.verbose:
+                    print("Stopping early as no improvement has been observed.")
+
+early_stopping = EarlyStopping(patience=5, delta=0.01, verbose=True)
+
 def train(trainloader, validloader, model, lr=0.0001, gamma=0.1, num_epochs=100, seed=42, testloader=None):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     criterion = nn.CrossEntropyLoss()
@@ -207,6 +229,13 @@ def train(trainloader, validloader, model, lr=0.0001, gamma=0.1, num_epochs=100,
 
         results_val_df = pd.DataFrame(results_val, columns=['epoch', 'loss', 'accuracy'])
         results_val_df.to_csv(os.path.join(args.storage_path, f'results_val_{args.model}.csv'), index=True)
+
+        # Check early stopping condition
+        early_stopping.check_early_stop(val_loss)
+        
+        if early_stopping.stop_training:
+            print(f"Early stopping at epoch {epoch}")
+            break
 
         if testloader is not None and (epoch == num_epochs - 1):
             results_test = test(testloader=testloader, model=model, seed=args.seed)
