@@ -85,29 +85,8 @@ def create_model(name, num_classes, pretrained=True):
         raise ValueError("Model not supported")
     return model.to(device)
 
-# def early_stopping(train_loss, val_loss, min_delta, patience, counter=0):
-#     """
-#     Check if early stopping criteria are met.
-    
-#     Parameters:
-#     - train_loss: Current training loss
-#     - val_loss: Current validation loss
-#     - min_delta: Minimum change in the monitored quantity to qualify as an improvement
-#     - patience: Number of epochs with no improvement after which training will be stopped
-#     - counter: Counter for epochs with no improvement
-    
-#     Returns:
-#     - bool: True if training should stop, False otherwise
-#     """
-#     finished = False
-#     if abs(val_loss - train_loss) < min_delta:
-#         counter += 1
-#         if counter >= patience:
-#             print("Early stopping triggered")
-#             finished = True
-#     return finished, counter
 
-def train(trainloader, validloader, model, lr=0.0001, gamma=0.1, num_epochs=100, seed=42, testloader=None):
+def train(trainloader, validloader, model, lr=0.0001, gamma=0.1, num_epochs=100, seed=42, testloader=None, max_stagn=5):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     criterion = nn.CrossEntropyLoss()
     # optimizer = optim.SGD(model.parameters(), lr=0.01)
@@ -120,6 +99,7 @@ def train(trainloader, validloader, model, lr=0.0001, gamma=0.1, num_epochs=100,
     results_val = []
     counter = 0
     t = trange(num_epochs, desc="Epoch", position=0, leave=False)
+    best_val_loss, best_val_epoch = None, None
     for epoch in t:
         model.train()
 
@@ -174,6 +154,13 @@ def train(trainloader, validloader, model, lr=0.0001, gamma=0.1, num_epochs=100,
 
         val_loss /= len(validloader.dataset)
         val_acc = val_corrects.double() / len(validloader.dataset)
+
+        if best_val_loss is None or best_val_loss < val_loss:
+            best_val_loss, best_val_epoch = val_loss, epoch
+        if best_val_epoch < epoch - max_stagnation:
+            # nothing is improving for a while
+            early_stop = True
+            break  
 
         print(f'Epoch {epoch}/{num_epochs} \t\t Training Loss: {train_loss:.5f}, Acc: {train_corrects.item():.5f}, Validation Loss: {val_loss:.5f}, Acc: {val_acc.item():.5f}')
         results_val.append(EpochProgress(epoch, val_loss, val_acc.item()))
@@ -351,9 +338,10 @@ if __name__ == "__main__":
                             #  multiprocessing_context='fork'
                             )
 
+    max_stagnation = 20 # number of epochs without improvement to tolerate
 
     model = create_model(args.model, num_classes, pretrained=pretrained)
-    results_train, results_val = train(trainloader=trainloader, validloader=validloader, model=model, num_epochs=num_epochs, seed=args.seed, testloader=testloader, lr=args.learning_rate)
+    results_train, results_val = train(trainloader=trainloader, validloader=validloader, model=model, num_epochs=num_epochs, seed=args.seed, testloader=testloader, lr=args.learning_rate, max_stagn=max_stagnation)
     results_test = test(testloader=testloader, model=model, seed=args.seed)
 
 
