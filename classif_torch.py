@@ -131,28 +131,6 @@ def create_model(name, num_classes, pretrained=True):
 #             finished = True
 #     return finished, counter
 
-class EarlyStopping:
-    def __init__(self, patience=5, delta=0, verbose=False):
-        self.patience = patience
-        self.delta = delta
-        self.verbose = verbose
-        self.best_loss = None
-        self.no_improvement_count = 0
-        self.stop_training = False
-    
-    def check_early_stop(self, val_loss):
-        if self.best_loss is None or val_loss < self.best_loss - self.delta:
-            self.best_loss = val_loss
-            self.no_improvement_count = 0
-        else:
-            self.no_improvement_count += 1
-            if self.no_improvement_count >= self.patience:
-                self.stop_training = True
-                if self.verbose:
-                    print("Stopping early as no improvement has been observed.")
-
-early_stopping = EarlyStopping(patience=5, delta=0.01, verbose=True)
-
 def train(trainloader, validloader, model, lr=0.0001, gamma=0.1, num_epochs=100, seed=42, testloader=None):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     criterion = nn.CrossEntropyLoss()
@@ -166,6 +144,7 @@ def train(trainloader, validloader, model, lr=0.0001, gamma=0.1, num_epochs=100,
     results_val = []
     counter = 0
     t = trange(num_epochs, desc="Epoch", position=0, leave=False)
+    best_val_loss, best_val_epoch = None, None
     for epoch in t:
         model.train()
 
@@ -230,11 +209,11 @@ def train(trainloader, validloader, model, lr=0.0001, gamma=0.1, num_epochs=100,
         results_val_df = pd.DataFrame(results_val, columns=['epoch', 'loss', 'accuracy'])
         results_val_df.to_csv(os.path.join(args.storage_path, f'results_val_{args.model}.csv'), index=True)
 
-        # Check early stopping condition
-        early_stopping.check_early_stop(val_loss)
-        
-        if early_stopping.stop_training:
-            print(f"Early stopping at epoch {epoch}")
+        if best_val_loss is None or best_val_loss < val_loss:
+            best_val_loss, best_val_epoch = val_loss, epoch
+        if best_val_epoch < epoch - max_stagnation:
+            # nothing is improving for a while
+            early_stop = True
             break
 
         if testloader is not None and (epoch == num_epochs - 1):
@@ -402,8 +381,10 @@ if __name__ == "__main__":
                             )
 
 
+    max_stagnation = 20 # number of epochs without improvement to tolerate
+
     model = create_model(args.model, num_classes, pretrained=pretrained)
-    results_train, results_val = train(trainloader=trainloader, validloader=validloader, model=model, num_epochs=num_epochs, seed=args.seed, testloader=testloader, lr=args.learning_rate)
+    results_train, results_val = train(trainloader=trainloader, validloader=validloader, model=model, num_epochs=num_epochs, seed=args.seed, testloader=testloader, lr=args.learning_rate, max_stagn=max_stagnation)
     results_test = test(testloader=testloader, model=model, seed=args.seed)
 
 
