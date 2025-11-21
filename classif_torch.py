@@ -131,7 +131,7 @@ def create_model(name, num_classes, pretrained=True):
 #             finished = True
 #     return finished, counter
 
-def train(trainloader, validloader, model, lr=0.0001, gamma=0.1, num_epochs=100, seed=42, testloader=None):
+def train(trainloader, validloader, model, lr=0.0001, gamma=0.1, num_epochs=100, seed=42, testloader=None, max_stagn=5):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     criterion = nn.CrossEntropyLoss()
     # optimizer = optim.SGD(model.parameters(), lr=0.01)
