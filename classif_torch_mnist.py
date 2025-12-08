@@ -171,6 +171,13 @@ def train(trainloader, validloader, model, lr=0.0001, gamma=0.1, num_epochs=100,
         results_val_df = pd.DataFrame(results_val, columns=['epoch', 'loss', 'accuracy'])
         results_val_df.to_csv(os.path.join(args.storage_path, f'results_val_{args.model}.csv'), index=True)
 
+        if best_val_loss is None or best_val_loss > val_loss:
+            best_val_loss, best_val_epoch = val_loss, epoch
+        if best_val_epoch < epoch - max_stagnation:
+            # nothing is improving for a while
+            early_stop = True
+            break
+
         if testloader is not None and (epoch == num_epochs - 1):
             results_test = test(testloader=testloader, model=model, seed=args.seed)
             print(f'Test Loss: {results_test["loss"].values[-1]:.5f}, Acc: {results_test["accuracy"].values[-1]:.5f}')
