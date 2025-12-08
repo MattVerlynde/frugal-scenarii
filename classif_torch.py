@@ -386,6 +386,9 @@ if __name__ == "__main__":
     model = create_model(args.model, num_classes, pretrained=pretrained)
     results_train, results_val = train(trainloader=trainloader, validloader=validloader, model=model, num_epochs=num_epochs, seed=args.seed, testloader=testloader, lr=args.learning_rate, max_stagn=max_stagnation)
     results_test = test(testloader=testloader, model=model, seed=args.seed)
+    # Save model checkpoint
+    os.makedirs(os.path.join(args.storage_path, "model_checkpoints"), exist_ok=True)
+    torch.save(model.state_dict(), os.path.join(args.storage_path, "model_checkpoints", f"{args.model}_checkpoint.pth"))
 
 
     results_train.to_csv(os.path.join(args.storage_path, f'results_train_{args.model}.csv'), index=True)
