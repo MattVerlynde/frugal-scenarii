@@ -316,12 +316,12 @@ if __name__ == "__main__":
     #                                 transform=transform_val
     #                                 )
     
-    full_train_dataset = datasets.MNIST(data_root, train=True, download=True, transform=transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.1307,), (0.3081,))]))
+    full_train_dataset = datasets.CIFAR100(data_root, train=True, download=True, transform=transforms.Compose([transforms.ToTensor()]))
     len_dataset_train = len(full_train_dataset)
     len_train = int(0.6*len_dataset_train)
     len_val = len_dataset_train - len_train
     dataset_train, dataset_val = torch.utils.data.random_split(full_train_dataset, [len_train, len_val], generator=torch.Generator().manual_seed(args.seed))
-    dataset_test = datasets.MNIST(data_root, train=False, download=True, transform=transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.1307,), (0.3081,))]))
+    dataset_test = datasets.CIFAR100(data_root, train=False, download=True, transform=transforms.Compose([transforms.ToTensor()]))
 
 
     trainloader = DataLoader(dataset_train, 
