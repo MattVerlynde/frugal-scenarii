@@ -20,11 +20,11 @@ def create_model(name, num_classes, pretrained=True):
     
     if name == 'resnet18':
         model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT if pretrained else None)
-        if pretrained:
-            model.fc = nn.Linear(model.fc.in_features, 1000)
-            # import weights from checkpoint
-            torch.load("data/resnet18_checkpoint.pth")
-            model.load_state_dict(torch.load("data/resnet18_checkpoint.pth"))
+        # if pretrained:
+        #     model.fc = nn.Linear(model.fc.in_features, 1000)
+        #     # import weights from checkpoint
+        #     torch.load("data/resnet18_imagenet_checkpoint.pth")
+        #     model.load_state_dict(torch.load("data/resnet18_imagenet_checkpoint.pth"))
         model.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=True)
         model.conv1.weight.data.normal_(0, 0.01)  # Initialize weights
         model.conv1.bias.data.fill_(0.01)  # Initialize bias
@@ -32,18 +32,21 @@ def create_model(name, num_classes, pretrained=True):
         model.fc.weight.data.normal_(0, 0.01)  # Initialize weights
         model.fc.bias.data.fill_(0.01)  # Initialize bias
     elif name == 'resnet50':
-        model = models.resnet50(pretrained=pretrained)
+        model = models.resnet50(weights=models.ResNet18_Weights.DEFAULT if pretrained else None)
         num_ftrs = model.fc.in_features
+        model.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=True)
+        model.conv1.weight.data.normal_(0, 0.01)  # Initialize weights
+        model.conv1.bias.data.fill_(0.01)  # Initialize bias
         model.fc = nn.Linear(num_ftrs, num_classes)
         model.fc.weight.data.normal_(0, 0.01)  # Initialize weights
         model.fc.bias.data.fill_(0.01)  # Initialize bias
-        if pretrained:
-            for param in model.parameters():
-                param.requires_grad = False
-            for param in model.fc.parameters():
-                param.requires_grad = True
+        # if pretrained:
+        #     for param in model.parameters():
+        #         param.requires_grad = False
+        #     for param in model.fc.parameters():
+        #         param.requires_grad = True
     elif name == 'vgg16':
-        model = models.vgg16(pretrained=pretrained)
+        model = models.vgg16(weights=models.ResNet18_Weights.DEFAULT if pretrained else None)
         num_ftrs = model.classifier[6].in_features
         model.classifier[6] = nn.Linear(num_ftrs, num_classes)
         model.classifier[6].weight.data.normal_(0, 0.01)  # Initialize weights
@@ -54,7 +57,7 @@ def create_model(name, num_classes, pretrained=True):
             for param in model.classifier[6].parameters():
                 param.requires_grad = True
     elif name == 'densenet121':
-        model = models.densenet121(pretrained=pretrained)
+        model = models.densenet121(weights=models.ResNet18_Weights.DEFAULT if pretrained else None)
         num_ftrs = model.classifier.in_features
         model.classifier = nn.Linear(num_ftrs, num_classes)
         model.classifier.weight.data.normal_(0, 0.01)  # Initialize weights
@@ -65,23 +68,23 @@ def create_model(name, num_classes, pretrained=True):
             for param in model.classifier.parameters():
                 param.requires_grad = True
     elif name == 'mobilenet_v2':
-        model = models.mobilenet_v2(pretrained=pretrained)
+        model = models.mobilenet_v2(weights=models.ResNet18_Weights.DEFAULT if pretrained else None)
         num_ftrs = model.classifier[1].in_features
         model.classifier[1] = nn.Linear(num_ftrs, num_classes)
     elif name == 'efficientnet_b0':
-        model = models.efficientnet_b0(pretrained=pretrained)
+        model = models.efficientnet_b0(weights=models.ResNet18_Weights.DEFAULT if pretrained else None)
         num_ftrs = model.classifier[1].in_features
         model.classifier[1] = nn.Linear(num_ftrs, num_classes)
     elif name == 'googlenet':
-        model = models.googlenet(pretrained=pretrained)
+        model = models.googlenet(weights=models.ResNet18_Weights.DEFAULT if pretrained else None)
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, num_classes)
     elif name == 'shufflenet_v2_x0_5':
-        model = models.shufflenet_v2_x0_5(pretrained=pretrained)
+        model = models.shufflenet_v2_x0_5(weights=models.ResNet18_Weights.DEFAULT if pretrained else None)
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, num_classes)
     elif name == 'squeezenet1_0':
-        model = models.squeezenet1_0(pretrained=pretrained)
+        model = models.squeezenet1_0(weights=models.ResNet18_Weights.DEFAULT if pretrained else None)
         num_ftrs = model.classifier[1].in_channels
         model.classifier[1] = nn.Conv2d(num_ftrs, num_classes, kernel_size=(1, 1), stride=(1, 1))
         model.num_classes = num_classes

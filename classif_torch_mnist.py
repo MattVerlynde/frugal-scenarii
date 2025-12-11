@@ -23,8 +23,8 @@ def create_model(name, num_classes, pretrained=True):
         if pretrained:
             model.fc = nn.Linear(model.fc.in_features, 1000)
             # import weights from checkpoint
-            torch.load("data/resnet18_checkpoint.pth")
-            model.load_state_dict(torch.load("data/resnet18_checkpoint.pth"))
+            torch.load("data/resnet18_imagenet_checkpoint.pth")
+            model.load_state_dict(torch.load("data/resnet18_imagenet_checkpoint.pth"))
         model.conv1 = nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=True)
         model.conv1.weight.data.normal_(0, 0.01)  # Initialize weights
         model.conv1.bias.data.fill_(0.01)  # Initialize bias
