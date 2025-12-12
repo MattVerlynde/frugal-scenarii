@@ -85,7 +85,7 @@ def plot_acc_loss(output_path, plot_path):
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description='get all')
     parser.add_argument('--working_path', type=str, default="results/conso-imagenet", help='working_path to use')
-    parser.add_argument('--result_path', type=str, default="results/conso-imagenet/output_all_old.csv", help='result_path to use')
+    parser.add_argument('--result_path', type=str, default="results/conso-imagenet/output_all_old_1112.csv", help='result_path to use')
     parser.add_argument("--ids", type=int, required=True, nargs='+', help="ids to parse")
     parser.add_argument("--output_path", type=str)
     parser.add_argument("--plot_path", "-g", type=int, required=True, nargs='+')
