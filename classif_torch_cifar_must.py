@@ -11,14 +11,21 @@ from collections import namedtuple
 import argparse
 
 from tqdm import trange, tqdm
+import timm
 
 
-def create_model(name, num_classes, pretrained=True):
+def create_model(name, num_classes, pretrained=True, path_weights=""):
     # Set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     if name == 'resnet18':
-        model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT if pretrained else None)
+
+        # model = models.resnet18(weights=ResNet18_Weights.DEFAULT if pretrained else None)
+        model = models.resnet18(weights=None)
+        if pretrained:
+            state_dict = torch.load(f"{path_weights}/resnet18-f37072fd.pth", map_location="cpu", weights_only=True)
+            model.load_state_dict(state_dict)
+        # model = models.resnet18(weights=torch.load(f"{path_weights}/resnet18-f37072fd.pth", weights_only=True) if pretrained else None)
         # if pretrained:
         #     model.fc = nn.Linear(model.fc.in_features, 1000)
         #     # import weights from checkpoint
@@ -32,6 +39,7 @@ def create_model(name, num_classes, pretrained=True):
         model.fc.bias.data.fill_(0.01)  # Initialize bias
     elif name == 'resnet50':
         model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT if pretrained else None)
+        # model = models.resnet50(weights=torch.load(f"{path_weights}/resnet50.pth", weights_only=True) if pretrained else None)
         num_ftrs = model.fc.in_features
         model.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=True)
         model.conv1.weight.data.normal_(0, 0.01)  # Initialize weights
@@ -45,7 +53,12 @@ def create_model(name, num_classes, pretrained=True):
         #     for param in model.fc.parameters():
         #         param.requires_grad = True
     elif name == 'vgg16':
-        model = models.vgg16(weights=models.VGG16_Weights.DEFAULT if pretrained else None)
+        # model = models.vgg16(weights=models.VGG16_Weights.DEFAULT if pretrained else None)
+        model = models.vgg16(weights=None)
+        if pretrained:
+            state_dict = torch.load(f"{path_weights}/vgg16-397923af.pth", map_location="cpu", weights_only=True)
+            model.load_state_dict(state_dict)
+        # model = models.vgg16(weights=torch.load(f"{path_weights}/vgg16-397923af.pth", weights_only=True) if pretrained else None)
         num_ftrs = model.classifier[6].in_features
         model.classifier[6] = nn.Linear(num_ftrs, num_classes)
         model.classifier[6].weight.data.normal_(0, 0.01)  # Initialize weights
@@ -57,6 +70,7 @@ def create_model(name, num_classes, pretrained=True):
                 param.requires_grad = True
     elif name == 'densenet121':
         model = models.densenet121(weights=models.DenseNet121_Weights.DEFAULT if pretrained else None)
+        # model = models.densenet121(weights=torch.load(f"{path_weights}/densenet121.pth", weights_only=True) if pretrained else None)
         num_ftrs = model.classifier.in_features
         model.classifier = nn.Linear(num_ftrs, num_classes)
         model.classifier.weight.data.normal_(0, 0.01)  # Initialize weights
@@ -67,23 +81,44 @@ def create_model(name, num_classes, pretrained=True):
             for param in model.classifier.parameters():
                 param.requires_grad = True
     elif name == 'mobilenet_v2':
-        model = models.mobilenet_v2(weights=models.MobileNet_V2_Weights.DEFAULT if pretrained else None)
+        # model = models.mobilenet_v2(weights=models.MobileNet_V2_Weights.DEFAULT if pretrained else None)
+        model = models.mobilenet_v2(weights=None)
+        if pretrained:
+            state_dict = torch.load(f"{path_weights}/mobilenet_v2-b0353104.pth", map_location="cpu", weights_only=True)
+            model.load_state_dict(state_dict)
+        # model = models.mobilenet_v2(weights=torch.load(f"{path_weights}/mobilenet_v2-b0353104.pth", weights_only=True) if pretrained else None)
         num_ftrs = model.classifier[1].in_features
         model.classifier[1] = nn.Linear(num_ftrs, num_classes)
     elif name == 'efficientnet_b0':
-        model = models.efficientnet_b0(weights=models.EfficientNet_B0_Weights.DEFAULT if pretrained else None)
+        # model = models.efficientnet_b0(weights=models.EfficientNet_B0_Weights.DEFAULT if pretrained else None)
+        model = models.efficientnet_b0(weights=None)
+        if pretrained:
+            state_dict = torch.load(f"{path_weights}/efficientnet_b0_rwightman-7f5810bc.pth", map_location="cpu", weights_only=True)
+            model.load_state_dict(state_dict)
+        # model = models.efficientnet_b0(weights=torch.load(f"{path_weights}/efficientnet_b0_rwightman-7f5810bc.pth", weights_only=True) if pretrained else None)
         num_ftrs = model.classifier[1].in_features
         model.classifier[1] = nn.Linear(num_ftrs, num_classes)
     elif name == 'googlenet':
-        model = models.googlenet(weights=models.GoogLeNet_Weights.DEFAULT if pretrained else None)
+        # model = models.googlenet(weights=models.GoogLeNet_Weights.DEFAULT if pretrained else None)
+        model = models.googlenet(weights=torch.load(f"{path_weights}/googlenet.pth", weights_only=True) if pretrained else None)
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, num_classes)
     elif name == 'shufflenet_v2_x0_5':
-        model = models.shufflenet_v2_x0_5(weights=models.ShuffleNet_V2_X0_5_Weights.DEFAULT if pretrained else None)
+        # model = models.shufflenet_v2_x0_5(weights=models.ShuffleNet_V2_X0_5_Weights.DEFAULT if pretrained else None)
+        model = models.shufflenet_v2_x0_5(weights=None)
+        if pretrained:
+            state_dict = torch.load(f"{path_weights}/shufflenetv2_x0.5-f707e7126e.pth", map_location="cpu", weights_only=True)
+            model.load_state_dict(state_dict)
+        # model = models.shufflenet_v2_x0_5(weights=torch.load(f"{path_weights}/shufflenet_v2_x0.5-f707e7126e.pth", weights_only=True) if pretrained else None)
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, num_classes)
     elif name == 'squeezenet1_0':
-        model = models.squeezenet1_0(weights=models.SqueezeNet1_0_Weights.DEFAULT if pretrained else None)
+        # model = models.squeezenet1_0(weights=models.SqueezeNet1_0_Weights.DEFAULT if pretrained else None)
+        model = models.squeezenet1_0(weights=None)
+        if pretrained:
+            state_dict = torch.load(f"{path_weights}/squeezenet1_0-b66bff10.pth", map_location="cpu", weights_only=True)
+            model.load_state_dict(state_dict)
+        # model = models.squeezenet1_0(weights=torch.load(f"{path_weights}/squeezenet1_0-b66bff10.pth", weights_only=True) if pretrained else None)
         num_ftrs = model.classifier[1].in_channels
         model.classifier[1] = nn.Conv2d(num_ftrs, num_classes, kernel_size=(1, 1), stride=(1, 1))
         model.num_classes = num_classes
@@ -99,7 +134,7 @@ def train(trainloader, validloader, model, lr=0.0001, gamma=0.1, num_epochs=100,
     optimizer = optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.999), weight_decay=0.0001)
     # scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=gamma)
     # scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, "min", factor=gamma, patience=10)
+    # scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, "min", factor=gamma, patience=10)
 
     results_train = []
     results_val = []
@@ -172,14 +207,14 @@ def train(trainloader, validloader, model, lr=0.0001, gamma=0.1, num_epochs=100,
         results_val.append(EpochProgress(epoch, val_loss, val_acc.item()))
 
         # scheduler.step()
-        scheduler.step(val_loss)
+        # scheduler.step(val_loss)
 
         results_val_df = pd.DataFrame(results_val, columns=['epoch', 'loss', 'accuracy'])
         results_val_df.to_csv(os.path.join(args.storage_path, f'results_val_{args.model}.csv'), index=True)
 
         if best_val_loss is None or best_val_loss > val_loss:
             best_val_loss, best_val_epoch = val_loss, epoch
-        if best_val_epoch < epoch - max_stagnation:
+        if best_val_epoch < epoch - max_stagn:
             break
 
         if testloader is not None and (epoch == num_epochs - 1):
@@ -239,7 +274,7 @@ if __name__ == "__main__":
     parser.add_argument('--num_epochs', type=int, default=1, help='Number of epochs to train')
     parser.add_argument('--batch_size', type=int, default=512, help='Batch size for training and validation')
     parser.add_argument('--learning_rate', type=float, default=0.0001, help='Learning rate for training and validation')
-    parser.add_argument('--data_root', type=str, default='/media/HDD/MNIST', help='Root directory for MNIST dataset')
+    parser.add_argument('--data_root', type=str, help='Root directory for CIFAR dataset')
     parser.add_argument('--model', type=str, default='resnet18', help='Model architecture to use (e.g., resnet18, resnet50, vgg16, etc.)')
     parser.add_argument('--pretrained', type=str, default='True', help='Use pretrained model weights')
     parser.add_argument('--device', type=str, default='cuda', help='Device to use for training (e.g., cuda, cpu)')
@@ -285,9 +320,9 @@ if __name__ == "__main__":
 
     transform_train = CustomCompose([
         transforms.Resize(crop_size, interpolation=transforms.InterpolationMode.BILINEAR),  # Resize the image to the specified size
-        transforms.CenterCrop(crop_size),  # Center crop the image to the specified size
-        transforms.RandomResizedCrop(crop_size),  # Random crop the image to the specified size
-        transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
+        # transforms.CenterCrop(crop_size),  # Center crop the image to the specified size
+        # transforms.RandomResizedCrop(crop_size),  # Random crop the image to the specified size
+        # transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
         transforms.ToTensor(),           # Convert the PIL image to a tensor
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406], 
@@ -353,10 +388,21 @@ if __name__ == "__main__":
 
     max_stagnation = 20 # number of epochs without improvement to tolerate
 
-    model = create_model(args.model, num_classes, pretrained=pretrained)
-    results_train, results_val = train(trainloader=trainloader, validloader=validloader, model=model, num_epochs=num_epochs, seed=args.seed, testloader=testloader, lr=args.learning_rate, max_stagn=max_stagnation)
-    results_test = test(testloader=testloader, model=model, seed=args.seed)
+    model = create_model(args.model, num_classes, pretrained=pretrained, path_weights=args.data_root+"/weights")
 
+    from codecarbon import OfflineEmissionsTracker
+
+    DIR_CARBON = os.path.join(args.storage_path,"codecarbon")
+    os.makedirs(DIR_CARBON, exist_ok=True)
+    tracker = OfflineEmissionsTracker(country_iso_code="FRA", output_dir=DIR_CARBON, output_file="emissions_train.csv", log_level="warning")
+    tracker.start()
+    results_train, results_val = train(trainloader=trainloader, validloader=validloader, model=model, num_epochs=num_epochs, seed=args.seed, testloader=testloader, lr=args.learning_rate, max_stagn=max_stagnation)
+    tracker.stop()
+
+    tracker = OfflineEmissionsTracker(country_iso_code="FRA", output_dir=DIR_CARBON, output_file="emissions_test.csv", log_level="warning")
+    tracker.start()
+    results_test = test(testloader=testloader, model=model, seed=args.seed)
+    tracker.stop()
 
     results_train.to_csv(os.path.join(args.storage_path, f'results_train_{args.model}.csv'), index=True)
     results_val.to_csv(os.path.join(args.storage_path, f'results_val_{args.model}.csv'), index=True)

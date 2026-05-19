@@ -34,6 +34,8 @@ def get_acc_loss(working_path, ids, output_path):
                             'Loss_train': train_loss,
                             'Loss_val': val_loss
                         })], ignore_index=True)
+                    if os.path.exists(output_path):
+                        os.remove(output_path)
 
     # results.to_csv('results/conso-imagenet/output_summary_trainings.csv', index=False)
     results.to_csv(output_path, index=False)
